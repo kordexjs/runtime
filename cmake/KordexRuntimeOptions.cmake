@@ -28,6 +28,7 @@ option(KORDEX_RUNTIME_ENABLE_SANITIZERS "Enable sanitizers for Kordex runtime" O
 # --------------------------------------------------------------------
 # Dependency fetch options
 # --------------------------------------------------------------------
+option(KORDEX_RUNTIME_FETCH_UTILS "Auto-fetch vix::utils if missing" ON)
 option(KORDEX_RUNTIME_FETCH_ASYNC "Auto-fetch vix::async if missing" ON)
 option(KORDEX_RUNTIME_FETCH_ERROR "Auto-fetch vix::error if missing" ON)
 option(KORDEX_RUNTIME_FETCH_LOG "Auto-fetch vix::log if missing" ON)
@@ -49,6 +50,7 @@ option(KORDEX_RUNTIME_FETCH_TESTS "Auto-fetch vix::tests if missing" ON)
 # The root project is responsible for add_subdirectory order.
 # --------------------------------------------------------------------
 if(DEFINED KORDEX_UMBRELLA_BUILD AND KORDEX_UMBRELLA_BUILD)
+  set(KORDEX_RUNTIME_FETCH_UTILS OFF CACHE BOOL "Auto-fetch vix::utils if missing" FORCE)
   set(KORDEX_RUNTIME_FETCH_ASYNC OFF CACHE BOOL "Auto-fetch vix::async if missing" FORCE)
   set(KORDEX_RUNTIME_FETCH_ERROR OFF CACHE BOOL "Auto-fetch vix::error if missing" FORCE)
   set(KORDEX_RUNTIME_FETCH_LOG OFF CACHE BOOL "Auto-fetch vix::log if missing" FORCE)

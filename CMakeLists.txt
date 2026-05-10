@@ -72,6 +72,46 @@ file(GLOB_RECURSE KORDEX_RUNTIME_SOURCES CONFIGURE_DEPENDS
   "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
 )
 
+function(kordex_runtime_prepare_utils_dependencies)
+  if(TARGET spdlog::spdlog OR TARGET spdlog::spdlog_header_only)
+    set(_kordex_has_spdlog ON)
+  else()
+    find_package(spdlog CONFIG QUIET)
+
+    if(NOT TARGET spdlog::spdlog AND NOT TARGET spdlog::spdlog_header_only)
+      include(FetchContent)
+
+      message(STATUS "[runtime] Fetching spdlog for vix::utils")
+
+      FetchContent_Declare(spdlog
+        GIT_REPOSITORY https://github.com/gabime/spdlog.git
+        GIT_TAG        v1.15.3
+      )
+
+      FetchContent_MakeAvailable(spdlog)
+    endif()
+  endif()
+
+  if(TARGET fmt::fmt OR TARGET fmt::fmt-header-only)
+    set(_kordex_has_fmt ON)
+  else()
+    find_package(fmt CONFIG QUIET)
+
+    if(NOT TARGET fmt::fmt AND NOT TARGET fmt::fmt-header-only)
+      include(FetchContent)
+
+      message(STATUS "[runtime] Fetching fmt for vix::utils")
+
+      FetchContent_Declare(fmt
+        GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+        GIT_TAG        11.2.0
+      )
+
+      FetchContent_MakeAvailable(fmt)
+    endif()
+  endif()
+endfunction()
+
 # --------------------------------------------------------------------
 # Dependency helpers
 # --------------------------------------------------------------------
@@ -118,13 +158,26 @@ endfunction()
 # --------------------------------------------------------------------
 # Dependencies
 # --------------------------------------------------------------------
+set(KORDEX_VIX_GIT_TAG main CACHE STRING "Git branch/tag used to fetch Vix modules")
+
+kordex_runtime_prepare_utils_dependencies()
+
+kordex_runtime_require_target(
+  vix::utils
+  vix_utils
+  utils
+  KORDEX_RUNTIME_FETCH_UTILS
+  https://github.com/vixcpp/utils.git
+  ${KORDEX_VIX_GIT_TAG}
+)
+
 kordex_runtime_require_target(
   vix::async
   async
   async
   KORDEX_RUNTIME_FETCH_ASYNC
   https://github.com/vixcpp/async.git
-  v0.1.0
+  ${KORDEX_VIX_GIT_TAG}
 )
 
 kordex_runtime_require_target(
@@ -133,7 +186,7 @@ kordex_runtime_require_target(
   error
   KORDEX_RUNTIME_FETCH_ERROR
   https://github.com/vixcpp/error.git
-  v0.1.0
+  ${KORDEX_VIX_GIT_TAG}
 )
 
 kordex_runtime_require_target(
@@ -142,7 +195,7 @@ kordex_runtime_require_target(
   log
   KORDEX_RUNTIME_FETCH_LOG
   https://github.com/vixcpp/log.git
-  v0.1.0
+  ${KORDEX_VIX_GIT_TAG}
 )
 
 kordex_runtime_require_target(
@@ -151,7 +204,7 @@ kordex_runtime_require_target(
   fs
   KORDEX_RUNTIME_FETCH_FS
   https://github.com/vixcpp/fs.git
-  v0.1.0
+  ${KORDEX_VIX_GIT_TAG}
 )
 
 kordex_runtime_require_target(
@@ -160,7 +213,7 @@ kordex_runtime_require_target(
   path
   KORDEX_RUNTIME_FETCH_PATH
   https://github.com/vixcpp/path.git
-  v0.1.0
+  ${KORDEX_VIX_GIT_TAG}
 )
 
 kordex_runtime_require_target(
@@ -169,7 +222,7 @@ kordex_runtime_require_target(
   env
   KORDEX_RUNTIME_FETCH_ENV
   https://github.com/vixcpp/env.git
-  v0.1.0
+  ${KORDEX_VIX_GIT_TAG}
 )
 
 kordex_runtime_require_target(
@@ -178,7 +231,7 @@ kordex_runtime_require_target(
   process
   KORDEX_RUNTIME_FETCH_PROCESS
   https://github.com/vixcpp/process.git
-  v0.1.0
+  ${KORDEX_VIX_GIT_TAG}
 )
 
 kordex_runtime_require_target(
@@ -187,7 +240,7 @@ kordex_runtime_require_target(
   time
   KORDEX_RUNTIME_FETCH_TIME
   https://github.com/vixcpp/time.git
-  v0.1.0
+  ${KORDEX_VIX_GIT_TAG}
 )
 
 kordex_runtime_require_target(
@@ -196,10 +249,11 @@ kordex_runtime_require_target(
   json
   KORDEX_RUNTIME_FETCH_JSON
   https://github.com/vixcpp/json.git
-  v0.1.0
+  ${KORDEX_VIX_GIT_TAG}
 )
 
 set(KORDEX_RUNTIME_DEPENDENCIES
+  vix::utils
   vix::async
   vix::error
   vix::log
@@ -363,6 +417,7 @@ endif()
 message(STATUS "------------------------------------------------------")
 message(STATUS "kordex::runtime configured (${PROJECT_VERSION})")
 message(STATUS "Export set: ${KORDEX_RUNTIME_EXPORT_SET}")
+message(STATUS "Utils target:   vix::utils")
 message(STATUS "Async target:   vix::async")
 message(STATUS "Error target:   vix::error")
 message(STATUS "Log target:     vix::log")
