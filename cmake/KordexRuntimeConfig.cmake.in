@@ -1,0 +1,17 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+find_dependency(async CONFIG REQUIRED)
+find_dependency(vix_error CONFIG REQUIRED)
+find_dependency(vix_log CONFIG REQUIRED)
+find_dependency(vix_fs CONFIG REQUIRED)
+find_dependency(vix_path CONFIG REQUIRED)
+find_dependency(vix_env CONFIG REQUIRED)
+find_dependency(vix_process CONFIG REQUIRED)
+find_dependency(vix_time CONFIG REQUIRED)
+find_dependency(vix_json CONFIG REQUIRED)
+
+include("${CMAKE_CURRENT_LIST_DIR}/kordex_runtimeTargets.cmake")
+
+check_required_components(kordex_runtime)
