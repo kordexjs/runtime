@@ -1,8 +1,8 @@
 #  @file CMakeLists.txt
-#  @author Gaspard Kirira
+#  @author Softadastra
 #
-#  Copyright 2026, Gaspard Kirira. All rights reserved.
-#  https://github.com/kordexjs/runtime
+#  Copyright 2026, Softadastra. All rights reserved.
+#  https://github.com/softadastra/runtime
 #  Use of this source code is governed by a MIT license
 #  that can be found in the LICENSE file.
 #
