@@ -1,0 +1,37 @@
+{
+  "name": "kordex-runtime",
+  "namespace": "softadastra",
+  "version": "0.1.0",
+  "type": "library",
+  "include": "include",
+  "deps": [
+    "vix/utils",
+    "vix/async",
+    "vix/error",
+    "vix/log",
+    "vix/fs",
+    "vix/path",
+    "vix/env",
+    "vix/process",
+    "vix/time",
+    "vix/json"
+  ],
+  "license": "MIT",
+  "description": "Native runtime engine for Kordex, providing runtime options, diagnostics, source loading, module resolution, timers, process integration, and the public Runtime facade.",
+  "keywords": [
+    "cpp",
+    "runtime",
+    "javascript-runtime",
+    "local-first",
+    "kordex",
+    "softadastra",
+    "vix"
+  ],
+  "repository": "https://github.com/softadastra/kordex-runtime",
+  "authors": [
+    {
+      "name": "Softadastra",
+      "github": "softadastra"
+    }
+  ]
+}
