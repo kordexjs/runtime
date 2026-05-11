@@ -21,6 +21,13 @@ option(KORDEX_RUNTIME_BUILD_TESTS "Build Kordex Runtime tests" OFF)
 option(KORDEX_RUNTIME_BUILD_EXAMPLES "Build Kordex Runtime examples" OFF)
 
 # --------------------------------------------------------------------
+# Install options
+# --------------------------------------------------------------------
+option(KORDEX_RUNTIME_ENABLE_INSTALL
+    "Generate install/export rules for Kordex Runtime"
+    OFF)
+
+# --------------------------------------------------------------------
 # Developer options
 # --------------------------------------------------------------------
 option(KORDEX_RUNTIME_ENABLE_WARNINGS "Enable compiler warnings for Kordex Runtime" ON)

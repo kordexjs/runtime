@@ -52,15 +52,27 @@ function(kordex_runtime_require_target target_name package_name sibling_dir fetc
         "[runtime] Umbrella build requires target '${target_name}' to be provided by the root project.")
   endif()
 
-  if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/../${sibling_dir}/CMakeLists.txt")
-    message(STATUS "[runtime] Adding ${target_name} from sibling: ../${sibling_dir}")
+set(local_umbrella_dep
+    "${CMAKE_CURRENT_LIST_DIR}/../../deps/vix/${sibling_dir}")
 
-    add_subdirectory(
-        "${CMAKE_CURRENT_LIST_DIR}/../${sibling_dir}"
-        "${CMAKE_CURRENT_BINARY_DIR}/_deps/${sibling_dir}")
-  else()
-    find_package(${package_name} CONFIG QUIET)
-  endif()
+set(local_sibling_dep
+    "${CMAKE_CURRENT_LIST_DIR}/../${sibling_dir}")
+
+if(EXISTS "${local_umbrella_dep}/CMakeLists.txt")
+  message(STATUS "[runtime] Adding ${target_name} from umbrella dependency: ${local_umbrella_dep}")
+
+  add_subdirectory(
+      "${local_umbrella_dep}"
+      "${CMAKE_CURRENT_BINARY_DIR}/_deps/${sibling_dir}")
+elseif(EXISTS "${local_sibling_dep}/CMakeLists.txt")
+  message(STATUS "[runtime] Adding ${target_name} from sibling: ${local_sibling_dep}")
+
+  add_subdirectory(
+      "${local_sibling_dep}"
+      "${CMAKE_CURRENT_BINARY_DIR}/_deps/${sibling_dir}")
+else()
+  find_package(${package_name} CONFIG QUIET)
+endif()
 
   if(TARGET ${target_name})
     return()
@@ -283,7 +295,8 @@ endif()
 # --------------------------------------------------------------------
 # Install
 # --------------------------------------------------------------------
-if(NOT (DEFINED KORDEX_UMBRELLA_BUILD AND KORDEX_UMBRELLA_BUILD))
+if(KORDEX_RUNTIME_ENABLE_INSTALL
+   AND NOT (DEFINED KORDEX_UMBRELLA_BUILD AND KORDEX_UMBRELLA_BUILD))
 
   install(
       TARGETS kordex_runtime
@@ -336,6 +349,7 @@ message(STATUS "  version   : ${PROJECT_VERSION}")
 message(STATUS "  target    : kordex::runtime")
 message(STATUS "  export    : ${KORDEX_RUNTIME_EXPORT_SET}")
 message(STATUS "  compiler  : ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
+message(STATUS "  install   : ${KORDEX_RUNTIME_ENABLE_INSTALL}")
 message(STATUS "  build     : ${CMAKE_BUILD_TYPE}")
 message(STATUS "  tests     : ${KORDEX_RUNTIME_BUILD_TESTS}")
 message(STATUS "  examples  : ${KORDEX_RUNTIME_BUILD_EXAMPLES}")
