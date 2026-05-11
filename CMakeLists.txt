@@ -216,9 +216,7 @@ target_link_libraries(kordex_runtime
 
 target_compile_definitions(kordex_runtime
     PUBLIC
-      KORDEX_RUNTIME_VERSION_MAJOR=${PROJECT_VERSION_MAJOR}
-      KORDEX_RUNTIME_VERSION_MINOR=${PROJECT_VERSION_MINOR}
-      KORDEX_RUNTIME_VERSION_PATCH=${PROJECT_VERSION_PATCH})
+      KORDEX_RUNTIME_VERSION_STRING="${PROJECT_VERSION}")
 
 if(KORDEX_RUNTIME_ENABLE_WARNINGS)
   target_compile_options(kordex_runtime

@@ -52,7 +52,7 @@ namespace
                kordex::runtime::version() == expected,
                "version string should be 0.1.0") &&
            expect_true(
-               kordex::runtime::KORDEX_RUNTIME_VERSION == expected,
+               kordex::runtime::version_string == expected,
                "version constant should be 0.1.0");
   }
 
