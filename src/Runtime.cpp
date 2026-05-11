@@ -253,8 +253,9 @@ namespace kordex::runtime
       return result;
     }
 
-    result = RuntimeResult::success(
-        "source validated successfully");
+    result.status = RuntimeExitStatus::Success;
+    result.exit_code = 0;
+    result.output = "source validated successfully";
 
     result.mark_finished();
 

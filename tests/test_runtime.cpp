@@ -18,6 +18,7 @@
 #include <chrono>
 #include <filesystem>
 #include <fstream>
+#include <iostream>
 #include <thread>
 
 #include <kordex/runtime/Runtime.hpp>
@@ -28,7 +29,10 @@ namespace
   {
     if (!condition)
     {
-      (void)message;
+      std::cerr << "[test_runtime] failed: "
+                << (message ? message : "unknown assertion")
+                << '\n';
+
       return false;
     }
 
@@ -662,38 +666,54 @@ namespace
                "move-assigned runtime should preserve config");
   }
 
+  bool run_test(
+      const char *name,
+      bool (*test)())
+  {
+    if (!test())
+    {
+      std::cerr << "[test_runtime] failed test: "
+                << (name ? name : "unknown")
+                << '\n';
+
+      return false;
+    }
+
+    return true;
+  }
+
   bool run_tests()
   {
     cleanup_test_files();
 
     const bool ok =
-        test_default_runtime() &&
-        test_runtime_from_config() &&
-        test_runtime_from_options() &&
-        test_development_runtime_factory() &&
-        test_test_runtime_factory() &&
-        test_start_runtime() &&
-        test_start_rejects_when_already_running() &&
-        test_stop_runtime() &&
-        test_shutdown_runtime() &&
-        test_load_source() &&
-        test_load_source_rejects_missing_file() &&
-        test_resolve_builtin_module() &&
-        test_resolve_package_module() &&
-        test_run_source_success() &&
-        test_run_source_rejects_json() &&
-        test_run_file_success() &&
-        test_run_file_rejects_missing_file() &&
-        test_post_executes_task() &&
-        test_post_rejects_when_not_running() &&
-        test_run_task_success() &&
-        test_run_task_failure() &&
-        test_load_manifest() &&
-        test_process_facade() &&
-        test_diagnostics_access() &&
-        test_loop_access() &&
-        test_move_constructor() &&
-        test_move_assignment();
+        run_test("test_default_runtime", test_default_runtime) &&
+        run_test("test_runtime_from_config", test_runtime_from_config) &&
+        run_test("test_runtime_from_options", test_runtime_from_options) &&
+        run_test("test_development_runtime_factory", test_development_runtime_factory) &&
+        run_test("test_test_runtime_factory", test_test_runtime_factory) &&
+        run_test("test_start_runtime", test_start_runtime) &&
+        run_test("test_start_rejects_when_already_running", test_start_rejects_when_already_running) &&
+        run_test("test_stop_runtime", test_stop_runtime) &&
+        run_test("test_shutdown_runtime", test_shutdown_runtime) &&
+        run_test("test_load_source", test_load_source) &&
+        run_test("test_load_source_rejects_missing_file", test_load_source_rejects_missing_file) &&
+        run_test("test_resolve_builtin_module", test_resolve_builtin_module) &&
+        run_test("test_resolve_package_module", test_resolve_package_module) &&
+        run_test("test_run_source_success", test_run_source_success) &&
+        run_test("test_run_source_rejects_json", test_run_source_rejects_json) &&
+        run_test("test_run_file_success", test_run_file_success) &&
+        run_test("test_run_file_rejects_missing_file", test_run_file_rejects_missing_file) &&
+        run_test("test_post_executes_task", test_post_executes_task) &&
+        run_test("test_post_rejects_when_not_running", test_post_rejects_when_not_running) &&
+        run_test("test_run_task_success", test_run_task_success) &&
+        run_test("test_run_task_failure", test_run_task_failure) &&
+        run_test("test_load_manifest", test_load_manifest) &&
+        run_test("test_process_facade", test_process_facade) &&
+        run_test("test_diagnostics_access", test_diagnostics_access) &&
+        run_test("test_loop_access", test_loop_access) &&
+        run_test("test_move_constructor", test_move_constructor) &&
+        run_test("test_move_assignment", test_move_assignment);
 
     cleanup_test_files();
 

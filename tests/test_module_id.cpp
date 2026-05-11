@@ -14,7 +14,9 @@
  *
  */
 
+#include <iostream>
 #include <string_view>
+
 #include <kordex/runtime/ModuleId.hpp>
 
 namespace
@@ -23,7 +25,10 @@ namespace
   {
     if (!condition)
     {
-      (void)message;
+      std::cerr << "[test_module_id] failed: "
+                << (message ? message : "unknown assertion")
+                << '\n';
+
       return false;
     }
 
@@ -207,6 +212,10 @@ namespace
 
     if (!result)
     {
+      std::cerr << "[test_module_id] parse builtin error: "
+                << result.error().message()
+                << '\n';
+
       return false;
     }
 
@@ -329,20 +338,36 @@ namespace
                "manual module id should validate");
   }
 
+  bool run_test(
+      const char *name,
+      bool (*test)())
+  {
+    if (!test())
+    {
+      std::cerr << "[test_module_id] failed test: "
+                << (name ? name : "unknown")
+                << '\n';
+
+      return false;
+    }
+
+    return true;
+  }
+
   bool run_tests()
   {
-    return test_detect_module_id_kind() &&
-           test_module_id_kind_to_string() &&
-           test_parse_relative_module_id() &&
-           test_parse_absolute_module_id() &&
-           test_parse_package_module_id() &&
-           test_parse_builtin_module_id() &&
-           test_parse_rejects_empty_specifier() &&
-           test_parse_rejects_empty_builtin_name() &&
-           test_parse_rejects_null_byte() &&
-           test_builtin_name_returns_empty_for_non_builtin() &&
-           test_validate_invalid_default_module_id() &&
-           test_manual_module_id_constructor();
+    return run_test("test_detect_module_id_kind", test_detect_module_id_kind) &&
+           run_test("test_module_id_kind_to_string", test_module_id_kind_to_string) &&
+           run_test("test_parse_relative_module_id", test_parse_relative_module_id) &&
+           run_test("test_parse_absolute_module_id", test_parse_absolute_module_id) &&
+           run_test("test_parse_package_module_id", test_parse_package_module_id) &&
+           run_test("test_parse_builtin_module_id", test_parse_builtin_module_id) &&
+           run_test("test_parse_rejects_empty_specifier", test_parse_rejects_empty_specifier) &&
+           run_test("test_parse_rejects_empty_builtin_name", test_parse_rejects_empty_builtin_name) &&
+           run_test("test_parse_rejects_null_byte", test_parse_rejects_null_byte) &&
+           run_test("test_builtin_name_returns_empty_for_non_builtin", test_builtin_name_returns_empty_for_non_builtin) &&
+           run_test("test_validate_invalid_default_module_id", test_validate_invalid_default_module_id) &&
+           run_test("test_manual_module_id_constructor", test_manual_module_id_constructor);
   }
 } // namespace
 

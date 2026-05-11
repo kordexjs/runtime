@@ -48,8 +48,10 @@ namespace kordex::runtime
   Result<ModuleId> ModuleId::parse(
       std::string specifier)
   {
+    const ModuleIdKind kind = detect_module_id_kind(specifier);
+
     ModuleId module_id(
-        detect_module_id_kind(specifier),
+        kind,
         std::move(specifier));
 
     const auto validation = module_id.validate();
