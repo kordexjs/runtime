@@ -3,7 +3,7 @@
 include(CMakeFindDependencyMacro)
 
 find_dependency(vix_utils CONFIG REQUIRED)
-find_dependency(async CONFIG REQUIRED)
+find_dependency(vix_async CONFIG REQUIRED)
 find_dependency(vix_error CONFIG REQUIRED)
 find_dependency(vix_log CONFIG REQUIRED)
 find_dependency(vix_fs CONFIG REQUIRED)
