@@ -44,7 +44,7 @@ namespace
     std::atomic<bool> done{false};
     std::atomic<bool> result{false};
 
-    vix::async::core::spawn(
+    vix::async::core::spawn_detached(
         context,
         [&]() -> vix::async::core::task<void>
         {
