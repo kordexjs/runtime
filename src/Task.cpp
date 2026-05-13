@@ -15,7 +15,6 @@
  */
 
 #include <exception>
-#include <string>
 #include <utility>
 
 #include <kordex/runtime/Task.hpp>
@@ -89,7 +88,9 @@ namespace kordex::runtime
     }
   }
 
-  Task::Task(TaskFunction function, TaskOptions options)
+  Task::Task(
+      TaskFunction function,
+      TaskOptions options)
       : function_(std::move(function)),
         options_(std::move(options)),
         info_()
@@ -127,6 +128,7 @@ namespace kordex::runtime
 
       result = RuntimeResult::failure(error, 1);
       result.mark_finished();
+
       return result;
     }
 
@@ -145,11 +147,11 @@ namespace kordex::runtime
 
       return result;
     }
-    catch (const std::exception &e)
+    catch (const std::exception &exception)
     {
       auto error = make_runtime_error(
           RuntimeErrorCode::InternalError,
-          e.what());
+          exception.what());
 
       info_.mark_failed(error);
 
@@ -177,21 +179,6 @@ namespace kordex::runtime
     }
   }
 
-  vix::runtime::TaskFn Task::to_vix_task()
-  {
-    return [this]() -> vix::runtime::TaskResult
-    {
-      const auto result = run();
-
-      if (result.succeeded())
-      {
-        return vix::runtime::TaskResult::complete;
-      }
-
-      return vix::runtime::TaskResult::failed;
-    };
-  }
-
   const char *to_string(
       TaskStatus status) noexcept
   {
@@ -199,12 +186,16 @@ namespace kordex::runtime
     {
     case TaskStatus::Pending:
       return "pending";
+
     case TaskStatus::Running:
       return "running";
+
     case TaskStatus::Completed:
       return "completed";
+
     case TaskStatus::Failed:
       return "failed";
+
     case TaskStatus::Cancelled:
       return "cancelled";
     }
@@ -220,10 +211,13 @@ namespace kordex::runtime
     case TaskStatus::Pending:
     case TaskStatus::Running:
       return RuntimeExitStatus::Failed;
+
     case TaskStatus::Completed:
       return RuntimeExitStatus::Success;
+
     case TaskStatus::Failed:
       return RuntimeExitStatus::Failed;
+
     case TaskStatus::Cancelled:
       return RuntimeExitStatus::Cancelled;
     }

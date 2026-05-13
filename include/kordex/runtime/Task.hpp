@@ -20,10 +20,8 @@
 #include <functional>
 #include <string>
 
-#include <vix/runtime/Task.hpp>
-
 #include <kordex/runtime/Clock.hpp>
-#include <kordex/runtime/Result.hpp>
+#include <kordex/runtime/Error.hpp>
 #include <kordex/runtime/RuntimeResult.hpp>
 
 namespace kordex::runtime
@@ -44,8 +42,8 @@ namespace kordex::runtime
   /**
    * @brief User-facing task function.
    *
-   * Kordex keeps the public runtime task API simple.
-   * Internally, this is adapted to vix::runtime::TaskFn.
+   * Kordex keeps the runtime task API independent from external runtime
+   * implementations. A task is simply a callable unit of work.
    */
   using TaskFunction = std::function<void()>;
 
@@ -105,7 +103,7 @@ namespace kordex::runtime
     /**
      * @brief Optional task error.
      */
-    Error error{};
+    Error error{ok()};
 
     /**
      * @brief Return true if the task completed successfully.
@@ -155,8 +153,8 @@ namespace kordex::runtime
    * @class Task
    * @brief Kordex runtime task wrapper.
    *
-   * Task wraps a simple void function and exposes helpers to execute it,
-   * track status, and adapt it to Vix runtime tasks.
+   * Task wraps a simple function and exposes helpers to execute it,
+   * track status, and convert the result into RuntimeResult.
    */
   class Task
   {
@@ -190,11 +188,6 @@ namespace kordex::runtime
      * @brief Execute the task immediately.
      */
     [[nodiscard]] RuntimeResult run();
-
-    /**
-     * @brief Convert this task to a Vix runtime task function.
-     */
-    [[nodiscard]] vix::runtime::TaskFn to_vix_task();
 
   private:
     TaskFunction function_{};
