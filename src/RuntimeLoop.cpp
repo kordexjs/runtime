@@ -16,10 +16,8 @@
 
 #include <exception>
 #include <utility>
-#include <cstdint>
 
 #include <kordex/runtime/RuntimeLoop.hpp>
-#include <vix/runtime/Task.hpp>
 
 namespace kordex::runtime
 {
@@ -28,8 +26,7 @@ namespace kordex::runtime
         state_(),
         cancellation_(),
         diagnostics_(config_.diagnostics),
-        async_context_(),
-        worker_runtime_(nullptr)
+        async_context_()
   {
   }
 
@@ -50,6 +47,11 @@ namespace kordex::runtime
       return validation;
     }
 
+    if (state_.is_running())
+    {
+      return ok();
+    }
+
     auto starting = state_.mark_starting();
     if (starting)
     {
@@ -62,17 +64,6 @@ namespace kordex::runtime
           DiagnosticLevel::Info,
           "runtime_loop_start",
           "starting Kordex runtime loop");
-
-      if (!worker_runtime_)
-      {
-        vix::runtime::RuntimeConfig runtime_config{
-            static_cast<std::uint32_t>(config_.workers)};
-
-        worker_runtime_ = std::make_unique<vix::runtime::Runtime>(
-            runtime_config);
-      }
-
-      worker_runtime_->start();
 
       auto running = state_.mark_running();
       if (running)
@@ -88,13 +79,13 @@ namespace kordex::runtime
 
       return ok();
     }
-    catch (const std::exception &e)
+    catch (const std::exception &exception)
     {
       state_.mark_failed();
 
       const auto error = make_runtime_error(
           RuntimeErrorCode::InternalError,
-          e.what());
+          exception.what());
 
       diagnostics_.record_error(
           "runtime_loop_start_failed",
@@ -132,20 +123,20 @@ namespace kordex::runtime
           "failed runtime loop cannot be stopped");
     }
 
+    if (state_.is_created())
+    {
+      auto stopped = state_.mark_stopped();
+      if (stopped)
+      {
+        return stopped;
+      }
+
+      return ok();
+    }
+
     auto stopping = state_.mark_stopping();
     if (stopping)
     {
-      if (state_.is_created())
-      {
-        auto stopped = state_.mark_stopped();
-        if (stopped)
-        {
-          return stopped;
-        }
-
-        return ok();
-      }
-
       return stopping;
     }
 
@@ -155,11 +146,6 @@ namespace kordex::runtime
           DiagnosticLevel::Info,
           "runtime_loop_stop",
           "stopping Kordex runtime loop");
-
-      if (worker_runtime_)
-      {
-        worker_runtime_->stop();
-      }
 
       async_context_.stop();
 
@@ -176,13 +162,13 @@ namespace kordex::runtime
 
       return ok();
     }
-    catch (const std::exception &e)
+    catch (const std::exception &exception)
     {
       state_.mark_failed();
 
       const auto error = make_runtime_error(
           RuntimeErrorCode::InternalError,
-          e.what());
+          exception.what());
 
       diagnostics_.record_error(
           "runtime_loop_stop_failed",
@@ -237,7 +223,7 @@ namespace kordex::runtime
           "runtime task cannot be empty");
     }
 
-    if (!is_running() || !worker_runtime_)
+    if (!is_running())
     {
       return make_runtime_error(
           RuntimeErrorCode::InvalidState,
@@ -246,35 +232,38 @@ namespace kordex::runtime
 
     try
     {
-      vix::runtime::TaskFn runtime_task =
-          [task = std::move(task)]() mutable -> vix::runtime::TaskResult
-      {
-        task();
-        return vix::runtime::TaskResult::complete;
-      };
+      task();
 
-      const bool accepted = worker_runtime_->submit(std::move(runtime_task));
-
-      if (!accepted)
-      {
-        return make_runtime_error(
-            RuntimeErrorCode::InvalidState,
-            "runtime task was rejected");
-      }
+      diagnostics_.record(
+          DiagnosticLevel::Info,
+          "runtime_loop_task",
+          "runtime task executed");
 
       return ok();
     }
-    catch (const std::exception &e)
+    catch (const std::exception &exception)
     {
-      return make_runtime_error(
+      const auto error = make_runtime_error(
           RuntimeErrorCode::InternalError,
-          e.what());
+          exception.what());
+
+      diagnostics_.record_error(
+          "runtime_loop_task_failed",
+          error);
+
+      return error;
     }
     catch (...)
     {
-      return make_runtime_error(
+      const auto error = make_runtime_error(
           RuntimeErrorCode::InternalError,
-          "unknown error while posting runtime task");
+          "unknown error while executing runtime task");
+
+      diagnostics_.record_error(
+          "runtime_loop_task_failed",
+          error);
+
+      return error;
     }
   }
 

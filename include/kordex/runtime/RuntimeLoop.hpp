@@ -18,17 +18,13 @@
 #define KORDEX_RUNTIME_RUNTIME_LOOP_HPP
 
 #include <functional>
-#include <memory>
 
 #include <vix/async/core/io_context.hpp>
 #include <vix/async/core/scheduler.hpp>
-#include <vix/async/core/task.hpp>
-#include <vix/runtime/Runtime.hpp>
 
 #include <kordex/runtime/Cancellation.hpp>
 #include <kordex/runtime/Diagnostics.hpp>
 #include <kordex/runtime/Error.hpp>
-#include <kordex/runtime/Result.hpp>
 #include <kordex/runtime/RuntimeConfig.hpp>
 #include <kordex/runtime/RuntimeState.hpp>
 
@@ -39,8 +35,7 @@ namespace kordex::runtime
    * @brief Runtime execution loop for Kordex.
    *
    * RuntimeLoop owns the internal execution services used by Kordex:
-   * - Vix async io_context for coroutine-based async operations
-   * - Vix runtime scheduler for worker-based tasks
+   * - Vix async io_context for async operations
    * - runtime lifecycle state
    * - runtime cancellation controller
    * - runtime diagnostics collector
@@ -99,7 +94,7 @@ namespace kordex::runtime
     [[nodiscard]] RuntimeLifecycleState state() const noexcept;
 
     /**
-     * @brief Submit a synchronous task to the runtime worker layer.
+     * @brief Submit a synchronous task to the runtime loop.
      */
     [[nodiscard]] Error post(TaskFunction task);
 
@@ -153,9 +148,7 @@ namespace kordex::runtime
     RuntimeState state_;
     Cancellation cancellation_;
     Diagnostics diagnostics_;
-
     vix::async::core::io_context async_context_;
-    std::unique_ptr<vix::runtime::Runtime> worker_runtime_;
   };
 
 } // namespace kordex::runtime
